@@ -1,0 +1,381 @@
+<section class="content-header">
+  <div class="container-fluid">
+      <div class="row">
+          <div class="col-6">
+              <h1>{{ "AuditLogs" | localize }}</h1>
+          </div>
+          <div class="col-6 text-right">
+              <p-menu appendTo="body" [popup]="true" #actionsMenu  [model]="getAuditLogsActions()"></p-menu>
+              <button type="button"
+              pButton
+              icon="pi pi-chevron-down"
+              iconPos="left"
+              [label]="l('Download')"
+              [loading]="isAuditActionEnabled"
+              (click)="actionsMenu.toggle($event)"></button>
+          </div>
+      </div>
+  </div>
+</section>
+
+<section class="content px-2">
+  <div class="container-fluid">
+      <p-tabView>
+          <!-- Operation Logs Tab -->
+          <p-tabPanel header="{{'OperationLogs' | localize}}">
+              <div class="card">
+                  <div class="card-header">
+                      <div class="p-inputgroup">
+                          <button pButton pRipple [label]="l('Search')" (click)="getAuditLogs($event)" *ngIf="!advancedFiltersVisible"></button>
+                          <input type="text" pInputText [placeholder]="'SearchWithThreeDotUsernameAuditLog' | localize" [(ngModel)]="usernameAuditLog" (keyup.enter)="getAuditLogs($event)" class="w-75"/>
+                          <button  pButton pRipple icon="pi pi-filter" (click)="advancedFiltersVisible = !advancedFiltersVisible"></button>
+                      </div>
+                      <div [hidden]="!advancedFiltersVisible" class="card mb-0 mt-3">
+                          <div class="card-body">
+                              <form #operationLogsFilterForm="ngForm">
+                                  <div class="row">
+                                      <div class="col-md-6">
+                                          <div class="p-fluid grid formgrid mb-0">
+                                              <!-- search name options -->
+                                              <div class="col-md-12 pt-2 d-flex flex-row m-4">
+                                                  <div class="col-md-6">
+                                                      <label for="browserSearchInput">{{"Browser" | localize}}</label>
+                                                      <input type="text" pInputText [placeholder]="'SearchWithThreeDotBrowserName' | localize"
+                                                      [(ngModel)]="browserInfo" [ngModelOptions]="{standalone: true}" id="browserSearchInput" class="min-w-full"/>
+                                                  </div>
+                                                  <div class="col-md-6">
+                                                      <label for="methodNameSearchInput">{{"Action" | localize}}</label>
+                                                      <input type="text" pInputText [placeholder]="'SearchWithThreeDotMethodName' | localize"
+                                                      [(ngModel)]="methodName" [ngModelOptions]="{standalone: true}" id="methodNameSearchInput" class="min-w-full"/>
+                                                  </div>
+                                                  <div class="col-md-6">
+                                                      <label for="serviceNameSearchInput">{{"Service" | localize}}</label>
+                                                      <input type="text" pInputText [placeholder]="'SearchWithThreeDotServiceName' | localize"
+                                                      [(ngModel)]="serviceName" [ngModelOptions]="{standalone: true}" id="serviceNameSearchInput" class="min-w-full"/>
+                                                  </div>
+                                              </div>
+                                              <!-- search time options -->
+                                              <div class="col-md-12 pt-2 d-flex flex-row m-4">
+                                                  <div class="col-md-6">
+                                                      <div class="flex">
+                                                          <div class="flex-row mr-3">
+                                                              <label for="startDate">{{"StartDate" | localize}}</label>
+                                                              <div>
+                                                                  <p-calendar [(ngModel)]="auditLogStartDate"
+                                                                  [ngModelOptions]="{standalone: true}"
+                                                                  [readonlyInput]="true"
+                                                                  showButtonBar="true"
+                                                                  inputId="startDate"
+                                                                  class="min-w-full"
+                                                                  [baseZIndex]="1051"></p-calendar>
+                                                              </div>
+                                                          </div>
+                                                          <div class="flex-row-reverse">
+                                                              <label for="endDate">{{"EndDate" | localize}}</label>
+                                                              <div>
+                                                                  <p-calendar [(ngModel)]="auditLogEndDate"
+                                                                  [ngModelOptions]="{standalone: true}"
+                                                                  [readonlyInput]="true"
+                                                                  showButtonBar="true"
+                                                                  inputId="endDate"
+                                                                  class="min-w-full"
+                                                                  [baseZIndex]="1051"></p-calendar>
+                                                              </div>
+                                                          </div>
+                                                      </div>
+                                                  </div>
+                                                  <div class="d-flex flex-column col-md-6">
+                                                      <label for="durationPeriod">{{"Duration" | localize}}</label>
+                                                      <div id="durationPeriod" class="min-w-full d-flex flex-row justify-content-between">
+                                                          <p-inputNumber #minExecutionDurationInput="ngModel"
+                                                                          [placeholder]="'MinExecutationDuration' | localize"
+                                                                          [(ngModel)]="minExecutionDuration"
+                                                                          [ngModelOptions]="{standalone: true}"
+                                                                          id="minExecutationDurationInput"
+                                                                          [min]="0"
+                                                                          [max]="86400"
+                                                                          class="w-6">
+                                                          </p-inputNumber>
+                                                          <i class="pi pi-minus align-self-center"></i>
+                                                          <p-inputNumber #maxExecutionDurationInput="ngModel"
+                                                                          [placeholder]="'MaxExecutationDuration' | localize"
+                                                                          [(ngModel)]="maxExecutionDuration"
+                                                                          [ngModelOptions]="{standalone: true}"
+                                                                          id="minExecutationDurationInput"
+                                                                          [min]="0"
+                                                                          [max]="86400"
+                                                                          class="w-6">
+                                                          </p-inputNumber>
+                                                      </div>
+                                                  </div>
+                                              </div>
+                                              <!-- select options-->
+                                              <div class="col-md-12 pt-2 d-flex flex-row m-4">
+                                                  <div class="col-md-6">
+                                                      <label for="hasException">{{"ErrorState" | localize}}</label>
+                                                      <p-dropdown [options]="errorStates" [(ngModel)]="hasException" [placeholder]="'SelectErrorState' | localize"
+                                                      optionLabel="name" [showClear]="true" id="hasException" [ngModelOptions]="{standalone: true}"></p-dropdown>
+                                                  </div>
+                                              </div>
+                                          </div>
+                                      </div>
+                                  </div>
+                              </form>
+                          </div>
+                          <div class="card-footer">
+                              <button pButton pRipple type="button" [label]="l('Reset')" class="p-button-outlined p-button-secondary" (click)="resetOperationLogs()"></button>
+                              <button pButton pRipple type="button" [label]="l('Search')" class="float-right" (click)="getAuditLogs($event)"></button>
+                          </div>
+                      </div>
+                  </div>
+                  <!-- Table with Operation Logs -->
+                  <div class="card-body">
+                      <div class="col primeng-datatable-container" [busyIf]="primengTableHelperAuditLogs.isLoading">
+                          <p-table #dataTableAuditLogs
+                                   (onLazyLoad)="getAuditLogs($event)"
+                                   [value]="primengTableHelperAuditLogs.records"
+                                   [paginator]="false"
+                                   [rows]="primengTableHelperAuditLogs.defaultRecordsCountPerPage"
+                                   [lazy]="true"
+                                   [scrollable]="false"
+                                   [responsive]="primengTableHelperAuditLogs.isResponsive">
+                              <ng-template pTemplate="header">
+                                  <tr>
+                                      <th style="width: 180px" *ngIf="canUseOperationLogsActions()">
+                                          {{'Actions' | localize}}
+                                      </th>
+                                      <th style="width: 75px">
+                                          {{'State' | localize}}
+                                      </th>
+                                      <th style="width: 150px" pSortableColumn="userName">
+                                          {{'UserName' | localize}}
+                                          <p-sortIcon field="userName"></p-sortIcon>
+                                      </th>
+                                      <th style="width: 250px">
+                                          {{'Service' | localize}}
+                                      </th>
+                                      <th style="width: 250px">
+                                          {{'Action' | localize}}
+                                      </th>
+                                      <th style="width: 150px" pSortableColumn="executionDuration">
+                                          {{'Duration' | localize}}
+                                          <p-sortIcon field="executionDuration"></p-sortIcon>
+                                      </th>
+                                      <th style="width: 150px">
+                                          {{'Client' | localize}}
+                                      </th>
+                                      <th style="width: 150px">
+                                          {{'Browser' | localize}}
+                                      </th>
+                                      <th style="width: 150px" pSortableColumn="executionTime">
+                                          {{'Time' | localize}}
+                                          <p-sortIcon field="executionTime"></p-sortIcon>
+                                      </th>
+                                  </tr>
+                              </ng-template>
+                              <ng-template pTemplate="body" let-record="$implicit">
+                                  <tr>
+                                      <td style="width: 180px" *ngIf="canUseOperationLogsActions()">
+                                          <p-menu appendTo="body" [popup]="true" #actionsMenu  [model]="getOperationLogsActions(record)"></p-menu>
+                                          <button type="button" pButton icon="pi pi-chevron-down" iconPos="right" [label]="l('Actions')" (click)="actionsMenu.toggle($event)"></button>
+                                      </td>
+                                      <td style="width: 75px">
+                                          <div class="text-center">
+                                              <i *ngIf="record.exception" class="pi pi-exclamation-triangle"></i>
+                                              <i *ngIf="!record.exception" class="pi pi-check-circle"></i>
+                                          </div>
+                                      </td>
+                                      <td style="width: 150px">
+                                          <span class="p-column-title">{{'UserName' | localize}}</span>
+                                          {{record.userName}}
+                                      </td>
+                                      <td style="width: 250px">
+                                          <span class="p-column-title">{{'Service' | localize}}</span>
+                                          {{record.serviceName}}
+                                      </td>
+                                      <td style="width: 250px">
+                                          <span class="p-column-title">{{'Action' | localize}}</span>
+                                          {{record.methodName}}
+                                      </td>
+                                      <td style="width: 150px">
+                                          <span class="p-column-title">{{'Duration' | localize}}</span>
+                                          {{record.executionDuration}}
+                                      </td>
+                                      <td style="width: 150px">
+                                          <span class="p-column-title">{{'Client' | localize}}</span>
+                                          {{record.clientName}}
+                                      </td>
+                                      <td style="width: 150px">
+                                          <span class="p-column-title">{{'Browser' | localize}}</span>
+                                          <span title="{{record.browserInfo}}">{{truncateStringWithPostfix(record.browserInfo, 20)}}</span>
+                                      </td>
+                                      <td style="width: 150px">
+                                          <span class="p-column-title">{{'Time' | localize}}</span>
+                                          {{ record.executionTime }}
+                                      </td>
+                                  </tr>
+                              </ng-template>
+                              <ng-template pTemplate="emptymessage">
+                                  <div class="justify-content-center m-4 text-center m-auto">
+                                      {{'NoData' | localize}}
+                                  </div>
+                              </ng-template>
+                          </p-table>
+                      </div>
+                      <div class="primeng-paging-container">
+                          <p-paginator [rows]="primengTableHelperAuditLogs.defaultRecordsCountPerPage" #paginatorAuditLogs
+                                       (onPageChange)="getAuditLogs($event)"
+                                       [totalRecords]="primengTableHelperAuditLogs.totalRecordsCount"
+                                       [rowsPerPageOptions]="primengTableHelperAuditLogs.predefinedRecordsCountPerPage">
+                          </p-paginator>
+                          <span class="total-records-count">
+                              {{'TotalRecordsCount' | localize:primengTableHelperAuditLogs.totalRecordsCount}}
+                          </span>
+                      </div>
+                  </div>
+              </div>
+           </p-tabPanel>
+           <!-- Change Logs Table -->
+           <p-tabPanel header="{{'ChangeLogs' | localize}}">
+              <div class="card">
+                  <div class="card-header">
+                      <div class="p-inputgroup">
+                          <button pButton pRipple [label]="l('Search')" (click)="getEntityChanges($event)" *ngIf="!advancedFiltersVisible"></button>
+                          <input type="text" pInputText [placeholder]="'SearchWithThreeDotUsernameEntityChange' | localize" [(ngModel)]="usernameEntityChange" (keyup.enter)="getEntityChanges($event)" class="w-75"/>
+                          <button  pButton pRipple icon="pi pi-filter" (click)="advancedFiltersVisible = !advancedFiltersVisible"></button>
+                      </div>
+                      <div [hidden]="!advancedFiltersVisible" class="card mb-0 mt-3">
+                          <div class="card-body">
+                              <form class="form-horizontal">
+                                  <div class="row">
+                                      <div class="col-md-6">
+                                          <div class="p-fluid grid formgrid mb-0">
+                                              <!-- change logs filters -->
+                                              <div class="col-md-12 pt-2 d-flex flex-row m-4">
+                                                  <!-- search time options -->
+                                                  <div class="col-md-6">
+                                                      <div class="flex">
+                                                          <div class="flex-row mr-3">
+                                                              <label for="startDateEntityChange">{{"StartDate" | localize}}</label>
+                                                              <div>
+                                                                  <p-calendar [(ngModel)]="entityChangeStartDate"
+                                                                  [ngModelOptions]="{standalone: true}"
+                                                                  [readonlyInput]="true"
+                                                                  showButtonBar="true"
+                                                                  inputId="startDateEntityChange"
+                                                                  class="min-w-full"
+                                                                  [baseZIndex]="1051"></p-calendar>
+                                                              </div>
+                                                          </div>
+                                                          <div class="flex-row-reverse">
+                                                              <label for="endDateEntityChange">{{"EndDate" | localize}}</label>
+                                                              <div>
+                                                                  <p-calendar [(ngModel)]="entityChangeEndDate"
+                                                                  [ngModelOptions]="{standalone: true}"
+                                                                  [readonlyInput]="true"
+                                                                  showButtonBar="true"
+                                                                  inputId="endDateEntityChange"
+                                                                  class="min-w-full"
+                                                                  [baseZIndex]="1051"></p-calendar>
+                                                              </div>
+                                                          </div>
+                                                      </div>
+                                                  </div>
+                                                  <!-- select options-->
+                                                  <div class="col-md-6">
+                                                      <label for="EntityTypeFullName">{{"Object" | localize}}</label>
+                                                      <p-dropdown [options]="objectTypes" [(ngModel)]="entityTypeFullName" placeholder="Select a type"
+                                                      optionLabel="name" class="min-w-full" [showClear]="true" id="EntityTypeFullName" [ngModelOptions]="{standalone: true}"></p-dropdown>
+                                                  </div>
+                                              </div>
+                                          </div>
+                                      </div>
+                                  </div>
+                              </form>
+                          </div>
+                          <div class="card-footer">
+                              <button pButton pRipple type="button" [label]="l('Reset')" class="p-button-outlined p-button-secondary" (click)="resetChangeLogs()"></button>
+                              <button pButton pRipple type="button" [label]="l('Search')" class="float-right" (click)="getEntityChanges($event)"></button>
+                          </div>
+                      </div>
+                  </div>
+                  <!-- Table with Operation Logs -->
+                  <div class="card-body">
+                      <div class="col primeng-datatable-container" [busyIf]="primengTableHelperEntityChanges.isLoading">
+                          <p-table #dataTableEntityChanges
+                                   (onLazyLoad)="getEntityChanges($event)"
+                                   [value]="primengTableHelperEntityChanges.records"
+                                   [paginator]="false"
+                                   [rows]="primengTableHelperEntityChanges.defaultRecordsCountPerPage"
+                                   [lazy]="true"
+                                   [scrollable]="false"
+                                   [responsive]="primengTableHelperEntityChanges.isResponsive">
+                              <ng-template pTemplate="header">
+                                  <tr>
+                                      <th style="width: 180px" *ngIf="canUseChangeLogsActions()">
+                                          {{'Actions' | localize}}
+                                      </th>
+                                      <th style="width: 150px">
+                                          {{'Action' | localize}}
+                                      </th>
+                                      <th style="width: 250px">
+                                          {{'Object' | localize}}
+                                      </th>
+                                      <th style="width: 150px" pSortableColumn="userName">
+                                          {{'UserName' | localize}}
+                                          <p-sortIcon field="userName"></p-sortIcon>
+                                      </th>
+                                      <th style="width: 150px" pSortableColumn="changeTime">
+                                          {{'Time' | localize}}
+                                          <p-sortIcon field="changeTime"></p-sortIcon>
+                                      </th>
+                                  </tr>
+                              </ng-template>
+                              <ng-template pTemplate="body" let-record="$implicit">
+                                  <tr>
+                                      <td style="width: 180px" *ngIf="canUseChangeLogsActions()">
+                                          <p-menu appendTo="body" [popup]="true" #actionsMenu  [model]="getChangeLogsActions(record)"></p-menu>
+                                          <button type="button" pButton icon="pi pi-chevron-down" iconPos="right" [label]="l('Actions')" (click)="actionsMenu.toggle($event)"></button>
+                                      </td>
+                                      <td style="width: 150px">
+                                          <span class="p-column-title">{{'Action' | localize}}</span>
+                                          <span title="{{record.changeTypeName}}">{{l(record.changeTypeName)}}</span>
+                                      </td>
+                                      <td style="width: 250px">
+                                          <span class="p-column-title">{{'Object' | localize}}</span>
+                                          {{record.entityTypeFullName}}
+                                      </td>
+                                      <td style="width: 150px">
+                                          <span class="p-column-title">{{'UserName' | localize}}</span>
+                                          {{record.userName}}
+                                      </td>
+                                      <td style="width: 150px">
+                                          <span class="p-column-title">{{'Time' | localize}}</span>
+                                          {{ record.changeTime }}
+                                      </td>
+                                  </tr>
+                              </ng-template>
+                              <ng-template pTemplate="emptymessage">
+                                  <div class="justify-content-center m-4 text-center m-auto">
+                                      {{'NoData' | localize}}
+                                  </div>
+                              </ng-template>
+                          </p-table>
+                      </div>
+                      <div class="primeng-paging-container">
+                          <p-paginator [rows]="primengTableHelperEntityChanges.defaultRecordsCountPerPage"
+                                      #paginatorEntityChanges
+                                      (onPageChange)="getEntityChanges($event)"
+                                      [totalRecords]="primengTableHelperEntityChanges.totalRecordsCount"
+                                      [rowsPerPageOptions]="primengTableHelperEntityChanges.predefinedRecordsCountPerPage">
+                          </p-paginator>
+                          <span class="total-records-count">
+                              {{'TotalRecordsCount' | localize:primengTableHelperEntityChanges.totalRecordsCount}}
+                          </span>
+                      </div>
+                  </div>
+              </div>
+           </p-tabPanel>
+      </p-tabView>
+  </div>
+</section>

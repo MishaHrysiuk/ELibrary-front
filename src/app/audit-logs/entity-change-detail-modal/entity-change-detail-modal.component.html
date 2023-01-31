@@ -1,0 +1,39 @@
+<hr>
+<div class="modal-body">
+    <p-table [value]="entityPropertyChanges" styleClass="p-datatable-gridlines">
+        <ng-template *ngIf="entityChange" pTemplate="caption">
+            {{entityChange.entityTypeFullName | localize}}
+        </ng-template>
+        <ng-template pTemplate="header">
+            <tr>
+                <th>{{"Property" | localize}}</th>
+                <th>{{"OriginalValue" | localize}}</th>
+                <th>{{"NewValue" | localize}}</th>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-product>
+            <tr>
+                <td><strong>{{product.propertyName}}</strong></td>
+                <td>{{getPropertyChangeValue(product.originalValue, product.propertyTypeFullName)}}</td>
+                <td>{{getPropertyChangeValue(product.newValue, product.propertyTypeFullName)}}</td>
+            </tr>
+        </ng-template>
+        <ng-template *ngIf="entityChange" pTemplate="summary">
+            <div class="mb-1">
+                {{"ModifiedByUser" | localize}} : {{entityChange.userName}}
+            </div>
+            <div>
+                {{"Time" | localize}} : {{entityChange.changeTime}}
+            </div>
+        </ng-template>
+    </p-table>
+</div>
+<hr>
+<div class="flex justify-content-between">
+    <button pButton
+            pRipple
+            type="button"
+            [label]="l('Close')"
+            class="p-button-outlined p-button-secondary"
+            (click)="close()"></button>
+</div>

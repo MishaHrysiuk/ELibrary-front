@@ -1,0 +1,139 @@
+<hr>
+<form *ngIf="active" #roleForm="ngForm" novalidate>
+    <div class="modal-body align-items-center justify-content-start">
+
+        <h3>{{"UserInformations" | localize}}</h3>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="form-group row">
+                    <label class="col-lg-3 col-form-label">
+                        {{"UserName" | localize}}:
+                    </label>
+                    <div class="col-lg-9 flex justify-content-start align-items-center">
+                        <span>{{auditLog.userName}}</span>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label class="col-lg-3 col-form-label">
+                        {{"IpAddress" | localize}}:
+                    </label>
+                    <div class="col-lg-9 flex justify-content-start align-items-center">
+                        <span>{{auditLog.clientIpAddress}}</span>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label class="col-lg-3 col-form-label">
+                        {{"Client" | localize}}:
+                    </label>
+                    <div class="col-lg-9 flex justify-content-start align-items-center">
+                        <span>{{auditLog.clientName}}</span>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label class="col-lg-3 col-form-label">
+                        {{"Browser" | localize}}:
+                    </label>
+                    <div class="col-lg-9 flex justify-content-start align-items-center">
+                        <span>{{auditLog.browserInfo}}</span>
+                    </div>
+                </div>
+                <div class="form-group row" *ngIf="auditLog.impersonatorUserId">
+                    <label class="col-lg-3 col-form-label">
+                    </label>
+                    <div class="col-lg-9 text-warning flex justify-content-start align-items-center">
+                        <span>{{"AuditLogImpersonatedOperationInfo" | localize}}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <h3>{{"ActionInformations" | localize}}</h3>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="form-group row">
+                    <label class="col-lg-3 col-form-label">
+                        {{"Service" | localize}}:
+                    </label>
+                    <div class="col-lg-9 flex justify-content-start align-items-center">
+                        <span>{{auditLog.serviceName}}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-12">
+                <div class="form-group row">
+                    <label class="col-lg-3 col-form-label">
+                        {{"Action" | localize}}:
+                    </label>
+                    <div class="col-lg-9 flex justify-content-start align-items-center">
+                        <span>{{auditLog.methodName}}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-12">
+                <div class="form-group row">
+                    <label class="col-lg-3 col-form-label">
+                        {{"Time" | localize}}:
+                    </label>
+                    <div class="col-lg-9 flex justify-content-start align-items-center">
+                        <span>{{getExecutionTime()}}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-12">
+                <div class="form-group row">
+                    <label class="col-lg-3 col-form-label">
+                        {{"Duration" | localize}}:
+                    </label>
+                    <div class="col-lg-9 flex justify-content-start align-items-center">
+                        <span>{{getDurationAsMs()}}</span>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label class="col-lg-3 col-form-label">
+                        {{"Parameters" | localize}}:
+                    </label>
+                    <div class="col-lg-9 alert kt-alert kt-alert--default flex justify-content-start align-items-center">
+                        <pre lang="js">{{getFormattedParameters()}}</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <h3>{{"CustomData" | localize}}</h3>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="form-group row">
+                    <label class="col-lg-3 col-form-label">
+                        {{"None" | localize}}:
+                    </label>
+                    <div *ngIf="auditLog.customData" class="col-lg-9 alert kt-alert kt-alert--default">
+                        <pre>{{auditLog.customData}}</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <h3>{{"ErrorState" | localize}}</h3>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="form-group row">
+                    <label *ngIf="!auditLog.exception" class="col-lg-12 col-form-label">
+                        <i class="pi pi-check-circle"></i> {{"Success" | localize}}
+                    </label>
+                    <div *ngIf="auditLog.exception" class="col-lg-12 pi pi-exclamation-triangle">
+                        <pre>{{auditLog.exception}}</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <hr>
+    <div class="flex justify-content-between">
+        <button pButton
+                pRipple
+                type="button"
+                [label]="l('Close')"
+                class="p-button-outlined p-button-secondary"
+                (click)="close()"></button>
+    </div>
+</form>
